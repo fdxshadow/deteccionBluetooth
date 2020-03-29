@@ -86,12 +86,12 @@ workflows:
   build-test-deploy:
     jobs:
       - build
-      - test:
-          requires:
-            - build
+      #- test:
+       #   requires:
+        #    - build
       - deployment_test:
           requires:
-            - test
+            - build
           #filters:
            # branches:
             #  only: master  
