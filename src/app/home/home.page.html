@@ -14,14 +14,14 @@
     <ion-list-header>
       Dispositivos Recientes
     </ion-list-header>
-    <ion-item>
+    <ion-item *ngFor="let device of devices">
       <ion-avatar slot="start">
         <ion-icon size="large" name="phone-portrait"></ion-icon>
       </ion-avatar>
       <ion-label>
-        <h2>Nombre dispositivo</h2>
-        <h3>Id dispositivo</h3>
-        <p>RSSI </p>
+        <h2>Nombre dispositivo: {{device.name || "Sin nombre"}}</h2>
+        <h3>Id dispositivo: {{device.id}}</h3>
+        <p>RSSI: {{device.rssi}} </p>
       </ion-label>
     </ion-item>
   </ion-list>
