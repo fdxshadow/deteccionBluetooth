@@ -1,0 +1,102 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:12.15.0-browsers
+    working_directory: ~/deteccionBluetooth
+    steps:
+    #comando de circleci para pararse en la rama correspondiente
+      - checkout
+      - run: npm install
+      #guardado de depndencias instaladas en este paso
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+  test:
+    docker:
+      - image: circleci/node:12.15.0-browsers
+    working_directory: ~/deteccionBluetooth
+    steps:
+      - checkout
+      #se recupera dependencias cacheadas o guardadas en el paso anterior
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
+            #se ejecuta comando de test
+      - run: npm test --no-watch
+  deployment_test:
+    docker:
+      - image: circleci/android:api-28-node
+    working_directory: ~/deteccionBluetooth
+    enviroment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
+
+        #download gradle
+      - run: wget https://services.gradle.org/distributions/gradle-6.1.1-bin.zip -P /tmp
+      #install unzip
+      - run: sudo apt-get install -y unzip
+      #unzip gradle
+      - run: sudo unzip -d /opt/gradle /tmp/gradle-6.1.1-bin.zip
+      #creacion rchivo de configuracion
+      - run: sudo touch /etc/profile.d/gradle.sh
+      #permisos a archivo
+      - run: sudo chmod 777 /etc/profile.d/gradle.sh
+      #variables de entorno
+      #- run: sudo echo 'export GRADLE_HOME=/opt/gradle/gradle-6.1.1' >> /etc/profile.d/gradle.sh
+      #- run: sudo echo 'export PATH=${GRADLE_HOME}/bin:${PATH}' >> /etc/profile.d/gradle.sh
+      - run: echo 'export GRADLE_HOME=/opt/gradle/gradle-6.1.1' >> $BASH_ENV
+      - run: echo 'export PATH=${GRADLE_HOME}/bin:${PATH}' >> $BASH_ENV
+     #cargando variables de entorno
+      - run: source $BASH_ENV
+      - run: cat /etc/profile.d/gradle.sh
+     #version de sofwares  
+      - run: node --version      
+      - run: gradle --version
+        #se ejecuta instalacion de ionic      
+      - run: sudo npm install -g @ionic/cli
+        #se compila ionic 
+      - run: ionic build
+        #se pasa a codigo nativo android
+      - run: ionic capacitor add android
+        #se genera apk
+      - run: 
+          #command: ./gradlew assembleRelease --no-daemon --stacktrace
+          command: ./gradlew assembleDebug
+          working_directory: ~/deteccionBluetooth/android
+      - store_artifacts:
+          path: android/app/build/outputs/apk/
+          destination: apks/
+
+        #se construye apk
+        #subirlo a algun servidor en especial
+        #generar un email con apk o un repositorio de versiones que diga rama, apk
+
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - deployment_test:
+          requires:
+            - test
+          #filters:
+           # branches:
+            #  only: master  
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/mongo:3.4.4

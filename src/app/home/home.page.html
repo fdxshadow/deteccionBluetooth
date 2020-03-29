@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+     Deteccion de Dispositivos Blueetooth
+    </ion-title>
+    <ion-button (click)="Scan()" slot="end">
+      <ion-icon name="bluetooth-outline"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list>
+    <ion-list-header>
+      Dispositivos Recientes
+    </ion-list-header>
+    <ion-item>
+      <ion-avatar slot="start">
+        <ion-icon size="large" name="phone-portrait"></ion-icon>
+      </ion-avatar>
+      <ion-label>
+        <h2>Nombre dispositivo</h2>
+        <h3>Id dispositivo</h3>
+        <p>RSSI </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

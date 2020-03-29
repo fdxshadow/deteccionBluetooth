@@ -1,0 +1,7 @@
+{
+  "name": "deteccionBluetooth",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
